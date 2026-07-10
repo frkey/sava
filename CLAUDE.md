@@ -40,6 +40,13 @@ npm run deploy:prod  # build + push + new version on prod deployment
 
 - **Git flow:** work on a feature branch and open a **pull request targeting `master`** (the default branch). Never commit directly to `master`.
 - **Pending work becomes GitHub issues:** when finishing a task that leaves unresolved or deferred items — follow-ups, tech-debt, deferred fixes, open product decisions — file each as a GitHub issue on `frkey/sava` (`gh issue create`), don't leave them only in notes or code comments.
+- **Non-trivial work follows the full pipeline** — anything beyond a small, localized point-fix (new features, subsystems, behavior changes) goes through, in order:
+  1. **Brainstorm** the design with the `superpowers:brainstorming` skill.
+  2. **Write the plan** with `superpowers:writing-plans`. Plans live in `knowledge/`, and each plan's task/TODO list is contained **inside the plan's own `.md`** — don't track the work elsewhere.
+  3. Once the plan is finalized, do a **critical (adversarial) review of the plan** before writing any code.
+  4. **Implement with subagents** (`superpowers:subagent-driven-development`).
+  5. When implementation is done, run a **`/code-review`** pass and address it before the PR.
+- **Always green before a PR:** run the full test/validation suite — `npm run test && npm run typecheck && npm run build` — and the `/code-review` above, and only open the PR once everything passes. This applies to point-fixes too (they skip steps 1–4, not this).
 
 ## Status
 
