@@ -21,7 +21,7 @@ Internal web app for a regional administrative body to track findings ("apontame
 
 - Only `src/server/repositories/` may touch `SpreadsheetApp`/`DriveApp` — plus `src/server/gas/` (the composition root: `wiring.ts` opens the spreadsheet, `main.ts` handles backup/triggers). Pure logic that tests import lives apart from GAS-typed files (see `runtime.ts` vs `wiring.ts` split). Services stay pure (unit-testable with vitest).
 - Every write goes through `LockService` script lock. Header validation (schema-drift guard) runs inside that lock, so it protects writes without slowing reads. Read cost is controlled by a per-request memo in `table()` + a cross-request `CacheService` cache for Cities/Departments (cleared on write); the client caches `cities.list`/`departments.list` (cleared on session change and master-data save).
-- The server build emits `server.js` (IIFE; implementations under the `__sava` namespace only) + `stubs.js` (five plain-ES5 delegating declarations: doGet/api/setup/purgeSessions/weeklyBackup — the ONLY invocable surface; the GAS function-registry scanner chokes on bundled modern syntax, so never put the invocable names inside the bundle). `setup()`/trigger handlers are guarded (abort for anonymous callers).
+- The server build emits `server.js` (IIFE; implementations under the `__sava` namespace only) + `stubs.js` (five plain-ES5 delegating declarations: doGet/api/setup/purgeSessions/weeklyBackup — the ONLY invocable surface; the GAS function-registry scanner chokes on bundled modern syntax, so never put the invocable names inside the bundle). The bundle targets **es2019, not es2020**: the scanner fails to parse `?.`/`??` and then registers zero functions for the whole project (`google.script.run.api is not a function` in the deployed app), even though the V8 runtime executes it fine. `setup()`/trigger handlers are guarded (abort for anonymous callers).
 - Repositories prefix an apostrophe to any string cell starting with `=` (spreadsheet formula injection guard).
 - Repositories map columns by header name, never by index. Update rows located by id at write time.
 - Never log or return password hashes, salts, or session tokens (except the token to its own user at login).
@@ -36,7 +36,11 @@ npm run deploy:dev   # build + clasp push to dev project
 npm run deploy:prod  # build + push + new version on prod deployment
 ```
 
+## Development workflow
+
+- **Git flow:** work on a feature branch and open a **pull request targeting `master`** (the default branch). Never commit directly to `master`.
+- **Pending work becomes GitHub issues:** when finishing a task that leaves unresolved or deferred items — follow-ups, tech-debt, deferred fixes, open product decisions — file each as a GitHub issue on `frkey/sava` (`gh issue create`), don't leave them only in notes or code comments.
+
 ## Status
 
-Server + client implemented (Plans 1-2). Pending: real-environment smoke
-(`knowledge/SMOKE_TEST.md`), Looker report, deploy.
+Server + client implemented (Plans 1-2), pushed to `github.com/frkey/sava` and deployed to the **dev** GAS environment. Remaining work is tracked as GitHub issues — notably the real-environment smoke test (`knowledge/SMOKE_TEST.md`), the Looker Studio report, and the prod bootstrap + deploy.
