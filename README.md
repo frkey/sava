@@ -56,17 +56,22 @@ is shared, nothing is hardcoded — every id lives in that project's Script Prop
    | `BACKUP_FOLDER_ID` | id of the `SAVA/{env}/backups` subfolder from step 2 |
    | `ENV` | `dev` or `prod` |
 
-4. **`npx clasp login`** once, with the institutional account (shared across both environments).
-5. **Point clasp at this project.** Copy `.clasp.dev.json.example` → `.clasp.dev.json` (and
+4. **Enable the Apps Script API for your Google account** — one-time, **per account** (not per project):
+   go to [script.google.com/home/usersettings](https://script.google.com/home/usersettings) and switch
+   the **Apps Script API** on. Until it's enabled, `clasp push`/`pull` (and therefore `npm run deploy:*`)
+   fail with `User has not enabled the Apps Script API`. After enabling, wait a minute or two for it to
+   propagate before retrying.
+5. **`npx clasp login`** once, with the institutional account (shared across both environments).
+6. **Point clasp at this project.** Copy `.clasp.dev.json.example` → `.clasp.dev.json` (and
    `.clasp.prod.json.example` → `.clasp.prod.json` for prod), paste the script ID from step 1 into
    `scriptId`. Both files are gitignored — they're per-checkout, not shared.
-6. **Push and run `setup()` once.** `npm run deploy:dev` (or `deploy:prod`) builds and pushes the code.
+7. **Push and run `setup()` once.** `npm run deploy:dev` (or `deploy:prod`) builds and pushes the code.
    Open the project in the Apps Script editor, select `setup` in the function dropdown, click **Run**.
    This creates/verifies all 10 tabs and their headers, seeds the 21 departments, and — only the first
    time (`Users` tab empty) — creates the first admin user (`login: sava.admin`) and installs the two
    time-driven triggers (`purgeSessions` daily, `weeklyBackup` weekly). The admin's temporary password
    is printed **once**, to the execution log (`Logger.log`) — copy it, it's never shown again.
-7. **Prod only — pin a deployment id.** `deploy:prod` publishes onto a fixed deployment so the web app
+8. **Prod only — pin a deployment id.** `deploy:prod` publishes onto a fixed deployment so the web app
    URL never changes across releases (a bare `clasp deploy` would mint a new URL every time). Create it
    once: `npx clasp deploy` (with `.clasp.prod.json` active), then copy the deployment id it prints and
    set it as the `PROD_DEPLOYMENT_ID` environment variable wherever `npm run deploy:prod` runs (shell
